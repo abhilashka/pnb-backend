@@ -1,2 +1,0 @@
-# pnb
-Public News Board
