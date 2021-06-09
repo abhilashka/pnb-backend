@@ -9,7 +9,7 @@ function sendEmail(email, subject, body, callback) {
       pass: config.emailPassword
     }
   })
-
+ 
   const options = {
     from: config.emailUser,
     to: email,
