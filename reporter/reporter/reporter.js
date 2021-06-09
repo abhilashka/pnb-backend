@@ -28,5 +28,25 @@ router.get('/test', (req, res) => {
 
 
 
+// ----------------------------------------------------
+// POST
+// ----------------------------------------------------
+
+
+
+router.post('/createnews', (request, response) => {
+  const { title, description, category, price, brand } = request.body
+
+  const statement = `insert into product (title, description, category, price, brand) values (
+    '${title}', '${description}', '${category}', '${price}', '${brand}'
+  )`
+
+  db.query(statement, (error, data) => {
+    response.send(utils.createResult(error, data))
+  })
+
+})
+
+
 
 module.exports = router
