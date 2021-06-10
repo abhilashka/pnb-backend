@@ -41,7 +41,12 @@ router.post('/signup', (request, response) => {
   // const { firstName, lastName, email, password } = request.body
 
   // const encryptedPassword = crypto.SHA256(password)
-  const statement1 = 'insert into address(city,localities,town,pincode) VALUES("pune","pune","pune",1234);'
+  // const statement1 = 'insert into address(city,localities,town,pincode) VALUES("pune","pune","pune",1234);'
+  
+  const { city,localities,town,pincode} = request.body
+  const statement1 = `insert into address(city,localities,town,pincode) VALUES(${city},${localities},${town},${pincode});`
+
+
   db.query(statement1, (error, data) => {
     if (error) {
       console.log(error)
