@@ -3,8 +3,10 @@ const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
 const utils = require('../utils')
 const db = require('../db')
+const config = require('../config')
 const multer = require('multer')
 const upload = multer({ dest: 'images/' })
+
 const router = express.Router()
 
 // ---------------------------------------
@@ -36,16 +38,42 @@ router.get('/test', (req, res) => {
 
 //sign up
 router.post('/signup', (request, response) => {
-  const { firstName, lastName, email, password } = request.body
+  // const { firstName, lastName, email, password } = request.body
 
-  const encryptedPassword = crypto.SHA256(password)
+  // const encryptedPassword = crypto.SHA256(password)
+  const statement1 = 'insert into address(city,localities,town,pincode) VALUES("pune","pune","pune",1234);'
+  db.query(statement1, (error, data) => {
+    if (error) {
+      console.log(error)
+    }
+    else {
+      console.log(data)
 
+    }
+  })
+  const statement2 = `insert into person_details(first_name,last_name,address,phone,email,password) values("john","rayn",(select id from address where pincode=1234),"909090","steven3@gmail.com","steven");`
+  db.query(statement2, (error, data) => {
+    if (error) {
+      console.log(error)
+    }
+    else {
+      console.log(data)
+
+    }
+
+  })
   //change query accroding to our db 
-  const statement = `insert into admin (firstName, lastName, email, password) values (
-    '${firstName}', '${lastName}', '${email}', '${encryptedPassword}'
-  )`
+  const statement = `insert into reporter (reporter_detail) values ((select id from person_details where email="steven3@gmail.com"))`
   db.query(statement, (error, data) => {
-    response.send(utils.createResult(error, data))
+    if (error) {
+      response.send(utils.createError(error))
+
+    }
+    else {
+      response.send(utils.createSuccess(data))
+
+
+    }
   })
 })
 
@@ -54,7 +82,7 @@ router.post('/signup', (request, response) => {
 router.post('/signin', (request, response) => {
   const { email, password } = request.body
   const statement = `select r.id,p.first_name,p.last_name from reporter r join person_details p on p.id=r.id
-                     where email = '${email}' and password = '${crypto.SHA256(password)}'`
+                     where email = '${email}' and password = '${password}'`
 
   db.query(statement, (error, reporters) => {
     if (error) {
