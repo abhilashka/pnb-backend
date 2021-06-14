@@ -1,7 +1,7 @@
 // Importing the packages required for the project.  
 const express = require('express')
-const utils = require('../utils')
-const db = require('../db')
+const utils = require('../../utils')
+const db = require('../../db')
 const router = express.Router()  
 const bodyParser = require('body-parser');
 const { networkInterfaces } = require('os');
@@ -48,8 +48,7 @@ router.get('/test', (req, res) => {
   
   })
   
-//   const { title, description, category, } = request.body
-//   `insert into news(title ,description, category, address) values {'${title}', '${description}','${address}' }`
+
 
 
   module.exports = router

@@ -1,6 +1,0 @@
-
-
-//sign in
-
-//registration
-
