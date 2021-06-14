@@ -1,18 +1,55 @@
-const express = require('express');
-const multer = require('multer');
-const upload = multer({
-  dest: 'uploads/' // this saves your file into a directory called "uploads"
-}); 
+// Importing the packages required for the project.  
+const express = require('express')
+const utils = require('../utils')
+const db = require('../db')
+const router = express.Router()  
+const bodyParser = require('body-parser');
+const { networkInterfaces } = require('os');
+const request = express.request;
 
-const app = express();
+// parse application/json
+router.use(bodyParser.json());
+ 
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
+router.get('/test', (req, res) => {
+    const statement = `select * from news`
+    db.query(statement, (error, data) => {
+      if (error) {
+        res.send(utils.createError(error))
+        console.log(`error`)
+      }
+      else {
+        res.send(utils.createSuccess(data))
+        console.log(`data`)
+      }
+    })
+  
+  })
 
-// It's very crucial that the file name matches the name attribute in your html
-app.post('/', upload.single('file-to-upload'), (req, res) => {
-  res.redirect('/');
-});
+  // ----------------------------------------------------
+  // POST
+  // ----------------------------------------------------
+  
+  
+  
+  router.post('/createnews', (request, response) => {
+    const { title, description } = request.body
+  
+    const statement = `insert into news (title, description ) values ( '${title}', '${description}')`
+    db.query(statement, (error, data) => {
+        if(error){
+     response.send(utils.createError(error))
 
-app.listen(3000);
+        }
+        else{
+     response.send(utils.createSuccess(data))
+        }
+    })
+  
+  })
+  
+//   const { title, description, category, } = request.body
+//   `insert into news(title ,description, category, address) values {'${title}', '${description}','${address}' }`
+
+
+  module.exports = router
