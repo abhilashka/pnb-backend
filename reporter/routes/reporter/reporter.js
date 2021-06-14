@@ -1,15 +1,9 @@
 const express = require('express')
-
 const utils = require('../../utils')
 const db = require('../../db')
-const router = express.Router()
-
-
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
-const utils = require('../../utils')
 const db = require('../../db')
-
 const config = require('../../config')
 const multer = require('multer')
 const upload = multer({ dest: 'images/' })
@@ -25,6 +19,7 @@ const router = express.Router()
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
+
 
 
 
@@ -76,19 +71,22 @@ router.post('/signup', (request, response) => {
 
     }
 
-  const { firstName, lastName, email, password } = request.body
+    const { firstName, lastName, email, password } = request.body
 
-  const encryptedPassword = crypto.SHA256(password)
+    const encryptedPassword = crypto.SHA256(password)
 
-  //change query accroding to our db 
-  const statement = `insert into admin (firstName, lastName, email, password) values (
+    //change query accroding to our db 
+    const statement = `insert into admin (firstName, lastName, email, password) values (
     '${firstName}', '${lastName}', '${email}', '${encryptedPassword}'
   )`
-  db.query(statement, (error, data) => {
-    response.send(utils.createResult(error, data))
+    db.query(statement, (error, data) => {
+      response.send(utils.createResult(error, data))
 
+    })
   })
+
 })
+
 
 
 //sign in
@@ -125,26 +123,9 @@ router.post('/signin', (request, response) => {
 
 
 
-router.post('/upload-image', upload.single('articleImage'), (request, response) => {
-  // const { productId } = request.params
-  const { title, description } = request.body
-
-  const fileName = request.file.filename
-
-  const statement = `insert into news(title,description,image) values('${title}', '${description}','${fileName}'); `
-  console.log(statement)
-  db.query(statement, (error, data) => {
-    response.send(utils.createResult(error, data))
-  })
-})
-
-
 
 
 
 
 
 module.exports = router
-
-
-
