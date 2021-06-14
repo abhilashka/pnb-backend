@@ -1,5 +1,7 @@
+require('dotenv').config()
+
 module.exports = {
-  secret: '1234567890abcdefghijklmnopqrstuvwxyz',
-  emailUser: 'experiments.nihal@gmail.com',
-  emailPassword: 'Indiaisbest'
+  secret: process.env.JWT_SECRET_ACCESS_KEY,
+  emailUser: process.env.ADMIN_EMAIL,
+  emailPassword: process.env.ADMIN_PASSWORD
 }
