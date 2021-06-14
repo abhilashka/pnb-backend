@@ -38,23 +38,5 @@ router.get('/:newsid', (request, response) => {
     })
   })
 
-  //insert the news according to citites
-  // router.get('/insert/:insertid', (request, response) => {
-  //   const { insertid } = request.params
-  //   const { desc } = request.body
-  //   const statement = ``
-  //   db.query(statement, (error, data) => {
-  //     if (error) {
-  //         response.send(utils.createError(error))
-  //         console.log(`error`)
-  //       }
-  //       else {
-  //         response.send(utils.createSuccess(data))
-  //         console.log(`data`)
-  //       }
-  //   })
-  // })
-
-
 
 module.exports = router
