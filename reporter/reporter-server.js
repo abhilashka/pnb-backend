@@ -1,10 +1,9 @@
 const express = require('express')
-const reporterserver = require('./routes/news/news')
 const bodyParser = require('body-parser')
 
-const newsRouter = require('./routes/reporter/news')
+const newsRouter = require('./routes/news/news')
 
-const reporetRouter = require('./routes/reporter/reporter')
+const reporterRouter = require('./routes/reporter/reporter')
 const jwt = require('jsonwebtoken')
 
 const app = express()
@@ -43,11 +42,10 @@ app.use(getreporterId)
 
 
 
-app.use('/reporter', reporetRouter)
+app.use('/reporter', reporterRouter)
 
 app.use('/news', newsRouter)
 
-app.use('/news', reporterserver)
 
 
 

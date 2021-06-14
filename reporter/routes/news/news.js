@@ -1,5 +1,6 @@
 
 const express = require('express')
+const bodyParser = require('body-parser')
 
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
