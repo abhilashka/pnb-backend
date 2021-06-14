@@ -48,8 +48,6 @@ router.get('/test', (req, res) => {
   
   })
   
-//   const { title, description, category, } = request.body
-//   `insert into news(title ,description, category, address) values {'${title}', '${description}','${address}' }`
 
 
   module.exports = router
