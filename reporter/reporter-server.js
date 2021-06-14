@@ -1,5 +1,5 @@
-
 const express = require('express')
+const reporterserver = require('./routes/news/news')
 const bodyParser = require('body-parser')
 const reporetRouter = require('./routes/reporter/reporter')
 const jwt = require('jsonwebtoken')
@@ -40,6 +40,7 @@ app.use(getreporterId)
 
 
 app.use('/reporter', reporetRouter)
+app.use('/news', reporterserver)
 
 
 app.get('/', (request, response) => {
