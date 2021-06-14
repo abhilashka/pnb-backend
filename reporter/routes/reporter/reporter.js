@@ -1,4 +1,10 @@
 const express = require('express')
+
+const utils = require('../../utils')
+const db = require('../../db')
+const router = express.Router()
+
+
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
 const utils = require('../../utils')
@@ -15,6 +21,7 @@ const mailer = require('../../mailer')
 
 const router = express.Router()
 
+
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
@@ -27,6 +34,7 @@ const router = express.Router()
 // ----------------------------------------------------
 // POST
 // ----------------------------------------------------
+
 
 //sign up
 router.post('/signup', (request, response) => {
@@ -116,6 +124,7 @@ router.post('/signin', (request, response) => {
 
 
 
+
 router.post('/upload-image', upload.single('articleImage'), (request, response) => {
   // const { productId } = request.params
   const { title, description } = request.body
@@ -136,5 +145,6 @@ router.post('/upload-image', upload.single('articleImage'), (request, response) 
 
 
 module.exports = router
+
 
 
