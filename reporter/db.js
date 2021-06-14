@@ -13,6 +13,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 })
 
-console.log("host :"+process.env.DB_PORT)
+
 
 module.exports = pool
