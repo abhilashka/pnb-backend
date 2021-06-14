@@ -28,7 +28,7 @@ function getreporterId(request, response, next) {
 
             // add a new key named reporterId with logged in reporter's id
             request.reporterId = data['id']
-
+            console.log('reporter id: ' + request.reporterId)
             // go to the actual route
             next()
 

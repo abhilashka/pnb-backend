@@ -54,9 +54,40 @@ router.get('/test', (req, res) => {
   module.exports = router
 =======
 const express = require('express')
-const db = require('../../db')
+
+const crypto = require('crypto-js')
+const jwt = require('jsonwebtoken')
 const utils = require('../../utils')
+const db = require('../../db')
+const config = require('../../config')
+const multer = require('multer')
+const upload = multer({ dest: 'images/' })
+
 const router = express.Router()
+
+// ---------------------------------------
+//                  POST
+// ---------------------------------------
+
+
+
+
+
+
+router.post('/upload-image', upload.single('articleImage'), (request, response) => {
+    // const { productId } = request.params
+    const { title, description } = request.body
+
+    const fileName = request.file.filename
+
+    const statement = `insert into news(title,description,image) values('${title}', '${description}','${fileName}'); `
+    console.log(statement)
+    db.query(statement, (error, data) => {
+        response.send(utils.createResult(error, data))
+    })
+})
+
+
 
 
 //get all news
