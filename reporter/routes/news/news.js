@@ -37,7 +37,7 @@ router.post('/addnews', (request, response) => {
   // POST
   // ----------------------------------------------------
   router.post('/createnews', (request, response) => {
-    const { content, headline } = request.body
+    const { header_id, content, headline } = request.body
     const statement = 'select a.id from user_details u join address a on u.id=a.id where a.id=u.address_id;'
     db.query(statement, (error, data) => {})
  //--insert into news_header
@@ -55,6 +55,7 @@ const statement2 = `insert into news_header(reporter_id, address_id) VALUES(rpt_
            news_header_id = data[0].Maxid+1
          }
          const statement3 = `insert into news_details (header_id, content, headline ) values ( SELECT id from news_header where id='${news_header_id}' )`
+
        db.query(statement3, (error, data) => {
            if(error){
         response.send(utils.createError(error))
