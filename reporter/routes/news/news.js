@@ -1,6 +1,4 @@
-
 const express = require('express')
-
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
 const utils = require('../../utils')
@@ -11,36 +9,10 @@ const upload = multer({ dest: 'images/' })
 
 const router = express.Router()
 
-// parse application/json
-router.use(bodyParser.json());
-
-
-
 
 // ---------------------------------------
 //                  POST
 // ---------------------------------------
-
-
-
-
-router.post('/createnews', (request, response) => {
-    const { title, description } = request.body
-
-    const statement = `insert into news (title, description ) values ( '${title}', '${description}')`
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-
-        }
-        else {
-            response.send(utils.createSuccess(data))
-        }
-    })
-
-})
-
-
 
 router.post('/upload-image', upload.single('articleImage'), (request, response) => {
     // const { productId } = request.params
@@ -56,8 +28,6 @@ router.post('/upload-image', upload.single('articleImage'), (request, response) 
 })
 
 
-
-
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
@@ -65,7 +35,7 @@ router.post('/upload-image', upload.single('articleImage'), (request, response) 
 
 //get all news
 router.get('/', (request, response) => {
-    const statement = `select title, description, date from news;`
+    const statement = `SELECT headline,content FROM pnb.news_details;;`
     db.query(statement, (error, data) => {
         if (error) {
             response.send(utils.createError(error))
@@ -79,22 +49,26 @@ router.get('/', (request, response) => {
 })
 
 
-// Towns/Cities/localities
-router.get('/:newsid', (request, response) => {
-    const { newsid } = request.params
-    const statement = `SELECT news.description, address.city
-    FROM news
-    INNER JOIN address ON news.id = address.id where news.id = ${newsid} and address.id = ${newsid};`
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-            console.log(`error`)
-        }
-        else {
-            response.send(utils.createSuccess(data))
-            console.log(`data`)
-        }
-    })
+//Towns/Cities/localities
+router.get('/getnews', (request, response) => {
+        let id= request.reporterId
+        const statement = `SELECT news_details.headline, news_details.content,address.city
+        FROM news_details
+        INNER JOIN address ON news_details.id = address.id where news_details.id = ${id} and address.id = ${id};`
+        db.query(statement, (error, data) => {
+            if (error) {
+                response.send(utils.createError(error))
+                console.log(`error`)
+            }
+            else {
+                response.send(utils.createSuccess(data))
+                console.log(`data`)
+            }
+        })
+    
+    
+    
+   
 })
 
 

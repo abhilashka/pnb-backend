@@ -1,10 +1,8 @@
 const express = require('express')
-const reporterserver = require('./routes/news/news')
+const newsRouter = require('./routes/news/news')
 const bodyParser = require('body-parser')
-
-const newsRouter = require('./routes/reporter/news')
-
-const reporetRouter = require('./routes/reporter/reporter')
+const reporterRouter = require('./routes/reporter/reporter')
+const config = require('./config')
 const jwt = require('jsonwebtoken')
 
 const app = express()
@@ -16,6 +14,7 @@ function getreporterId(request, response, next) {
         || request.url == '/reporter/signup'
         || request.url.startsWith('/reporter/activate')
         || request.url == '/logo.png'
+        || request.url == '/news'
         || request.url.startsWith('/product/image/')
         || request.url.startsWith('/reporter/forgot-password')) {
         // do not check for token 
@@ -43,11 +42,8 @@ app.use(getreporterId)
 
 
 
-app.use('/reporter', reporetRouter)
-
+app.use('/reporter',  reporterRouter)
 app.use('/news', newsRouter)
-
-app.use('/news', reporterserver)
 
 
 
