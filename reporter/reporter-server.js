@@ -1,10 +1,10 @@
 const express = require('express')
-const reporterserver = require('./routes/news/news')
+
 const bodyParser = require('body-parser')
 
-const newsRouter = require('./routes/reporter/news')
+const newsRouter = require('./routes/news/news')
 
-const reporetRouter = require('./routes/reporter/reporter')
+const reporterRouter = require('./routes/reporter/reporter')
 const jwt = require('jsonwebtoken')
 
 const app = express()
@@ -13,6 +13,8 @@ app.use(bodyParser.json())
 function getreporterId(request, response, next) {
 
     if (request.url == '/reporter/signin'
+    || request.url == '/news/addnews'
+
         || request.url == '/reporter/signup'
         || request.url.startsWith('/reporter/activate')
         || request.url == '/logo.png'
@@ -43,11 +45,11 @@ app.use(getreporterId)
 
 
 
-app.use('/reporter', reporetRouter)
+
 
 app.use('/news', newsRouter)
 
-app.use('/news', reporterserver)
+app.use('/reporter', reporterRouter)
 
 
 

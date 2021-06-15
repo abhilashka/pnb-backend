@@ -3,7 +3,7 @@ const utils = require('../../utils')
 const db = require('../../db')
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
-const db = require('../../db')
+
 const config = require('../../config')
 const multer = require('multer')
 const upload = multer({ dest: 'images/' })
