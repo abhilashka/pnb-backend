@@ -25,19 +25,45 @@ router.use(bodyParser.json());
 
 
 
-router.post('/createnews', (request, response) => {
-    const { title, description } = request.body
+router.post('/addnews', (request, response) => {
+    const { content, headline } = request.body;
 
-    const statement = `insert into news (title, description ) values ( '${title}', '${description}')`
-    db.query(statement, (error, data) => {
+    const userid = request.reporterId
+
+    const statement1 = `insert into news_header(reporter_id, address_id) VALUES('${userid}', (select address_id from user_details where id='${userid}'));`
+
+    db.query(statement1, (error, data) => {
         if (error) {
             response.send(utils.createError(error))
-
         }
         else {
-            response.send(utils.createSuccess(data))
+            const stm = `SELECT MAX(id) AS MaxId FROM news_header`;
+            var maxId = 0;
+            db.query(stm, (error, data) => {
+                if (error) {
+                    response.send(utils.createError(error))
+
+                }
+                else {
+                    maxId = data[0].MaxId;
+                    const statement2 = `insert into news_details(header_id,content,headline) VALUES('${maxId}','${content}','${headline}' );`
+                    db.query(statement2, (error, data) => {
+                        if (error) {
+                            response.send(utils.createError(error))
+
+                        }
+                        else {
+                            response.send(utils.createSuccess(data));
+
+
+                        }
+                    })
+                }
+            })
         }
     })
+
+
 
 })
 
@@ -64,39 +90,7 @@ router.post('/upload-image', upload.single('articleImage'), (request, response) 
 // ---------------------------------------
 
 
-//get all news
-router.get('/', (request, response) => {
-    const statement = `select title, description, date from news;`
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-            console.log(`error`)
-        }
-        else {
-            response.send(utils.createSuccess(data))
-            console.log(`data`)
-        }
-    })
-})
 
-
-// Towns/Cities/localities
-router.get('/:newsid', (request, response) => {
-    const { newsid } = request.params
-    const statement = `SELECT news.description, address.city
-    FROM news
-    INNER JOIN address ON news.id = address.id where news.id = ${newsid} and address.id = ${newsid};`
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-            console.log(`error`)
-        }
-        else {
-            response.send(utils.createSuccess(data))
-            console.log(`data`)
-        }
-    })
-})
 
 
 module.exports = router

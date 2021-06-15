@@ -1,11 +1,9 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-
 const newsRouter = require('./routes/news/news')
-
 const reporterRouter = require('./routes/reporter/reporter')
 const jwt = require('jsonwebtoken')
-
+const config = require('./config')
 const app = express()
 app.use(bodyParser.json())
 
@@ -24,7 +22,7 @@ function getreporterId(request, response, next) {
         try {
             const token = request.headers['token']
             const data = jwt.verify(token, config.secret)
-
+        
             // add a new key named reporterId with logged in reporter's id
             request.reporterId = data['id']
             console.log('reporter id: ' + request.reporterId)
