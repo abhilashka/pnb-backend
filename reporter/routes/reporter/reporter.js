@@ -32,30 +32,40 @@ const router = express.Router()
 
 //sign up
 router.post('/signup', (request, response) => {
-  // const statement1 = 'insert into address(city,localities,town,pincode) VALUES("pune","pune","pune",1234);'
+
   
   const { first_name,last_name,phone,email,password,city,localities,state,pincode,type} = request.body;
   // const encryptedPass = crypto.SHA256(password);
 
-  const stm=`SELECT MAX(id) AS MaxId FROM address`;
-  var maxId;
-  db.query(stm,(error, data) => {
-    if (error) {
-      console.log(error)
-    }    
-    else {
-      console.log(data[0].MaxId);
-      maxId=data[0].MaxId;
-    }
-  })
+  // const stm=`SELECT MAX(id) AS MaxId FROM address`;
+  // var maxId=0;
+  // db.query(stm,(error, data) => {
+  //   if (error) {
+  //     console.log(error)
+  //   }    
+  //   else {
+  //     console.log(data[0].MaxId);
+  //     maxId=data[0].MaxId;
+  //   }
+  // })
 
-  const statement1 = `insert into address(city,localities,state,pincode) VALUES('${city}','${localities}','${state}','${pincode}');`
+  // maxId=maxId+1;
+  const statement1 = `insert into address(id,city,localities,state,pincode) VALUES('${city}','${localities}','${state}','${pincode}');`
   
 
   db.query(statement1, (error, data) => {
-
+    if (error) {
+          // response.send(utils.createError(error))
+          console.log
+        }
+        else {
+          response.send(utils.createSuccess(data));
+    
+    
+        }
   })
-  const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE) values('${first_name}','${last_name}',(select id from address where pincode='${maxId}'),'${phone}','${email}','${type}');`
+                                                                                                                                                                    // '${maxId}'
+  const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE) values('${first_name}','${last_name}',(select id from address where pincode='${pincode}'),'${phone}','${email}','${type}');`
   db.query(statement2, (error, data) => {
     if (error) {
       console.log(error)
@@ -84,23 +94,25 @@ router.post('/signup', (request, response) => {
 
 
 
-  // // const statement = `insert into reporter (reporter_detail) values ((select id from person_details where email="steven3@gmail.com"))`
-  // const statement = `select * from news;`
-  // db.query(statement, (error, data) => {
-  //   if (error) {
-  //     response.send(utils.createError(error))
-
-  //   }
-  //   else {
-
-  //     mailer.sendEmail(email, 'Public News Board', body, (error, info) => {
-
-  //       response.send(utils.createSuccess(data))
-
-  //     })
+  // const statement = `insert into reporter (reporter_detail) values ((select id from person_details where email="steven3@gmail.com"))`
 
 
-    // }
+//   const statement = `select * from news;`
+//   db.query(statement, (error, data) => {
+//     if (error) {
+//       response.send(utils.createError(error))
+
+//     }
+//     else {
+
+//       mailer.sendEmail(email, 'Public News Board', body, (error, info) => {
+
+//         response.send(utils.createSuccess(data))
+
+//       })
+
+
+//     }
 
 //     const { firstName, lastName, email, password } = request.body
 
@@ -121,31 +133,31 @@ router.post('/signup', (request, response) => {
 
 
 //sign in
-router.post('/signin', (request, response) => {
-  const { email, password } = request.body
-  const statement = `select r.id,p.first_name,p.last_name from reporter r join person_details p on p.id=r.id
+// router.post('/signin', (request, response) => {
+//   const { email, password } = request.body
+//   const statement = `select r.id,p.first_name,p.last_name from reporter r join person_details p on p.id=r.id
 
-                     where email = '${email}' and password = '${crypto.SHA256(password)}'`
+//                      where email = '${email}' and password = '${crypto.SHA256(password)}'`
 
 
-  db.query(statement, (error, reporters) => {
-    if (error) {
-      response.send({ status: 'error', error: error })
-    } else {
-      if (reporters.length == 0) {
-        response.send({ status: 'error', error: 'reporter does not exist' })
-      } else {
-        const reporter = reporters[0]
-        const token = jwt.sign({ id: reporter['id'] }, config.secret)
-        response.send(utils.createResult(error, {
-          first_name: reporter['first_name'],
-          last_name: reporter['last_name'],
-          token: token
-        }))
-      }
-    }
-  })
-})
+//   db.query(statement, (error, reporters) => {
+//     if (error) {
+//       response.send({ status: 'error', error: error })
+//     } else {
+//       if (reporters.length == 0) {
+//         response.send({ status: 'error', error: 'reporter does not exist' })
+//       } else {
+//         const reporter = reporters[0]
+//         const token = jwt.sign({ id: reporter['id'] }, config.secret)
+//         response.send(utils.createResult(error, {
+//           first_name: reporter['first_name'],
+//           last_name: reporter['last_name'],
+//           token: token
+//         }))
+//       }
+//     }
+//   })
+// })
 
 
 
