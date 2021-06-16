@@ -9,10 +9,10 @@ const router = express.Router()
 const uuid = require('uuid')
 const fs = require('fs')
 const path = require('path')
+require('dotenv').config()
 
-
-const url = `http://localhost:`
-const port = `4000`
+const url = process.env.PROD_HOST
+const port = process.env.PROD_PORT
 
 
 
@@ -51,17 +51,20 @@ router.post('/signup', (request, response) => {
 
     const activationToken = uuid.v4()
     const activationLink = `${url}${port}/oAuth/activate/${activationToken}`
-    console.log(activationLink)
+    const logoLink = `./images/logo.svg`
 
-    const htmlPath = path.join(__dirname, '/../templates/send_activation_link.html')
-    let body = '' + fs.readFileSync(htmlPath)
-    body = body.replace('firstName', first_name)
-    body = body.replace('activationLink', activationLink)
+    console.log(activationLink)
+    console.log(logoLink)
+
+    let htmlPath = ``;
+    let body = ``;
+
 
     const statement1 = `insert into address(city,localities,state,pincode) VALUES('${city}','${localities}','${state}','${pincode}');`
 
 
     var isActive = 0;
+    var isVerified = 0;
 
     db.query(statement1, (error, data) => {
 
@@ -81,7 +84,11 @@ router.post('/signup', (request, response) => {
                 isActive = 1
             }
 
-            const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE,isActive,activationToken) values('${first_name}','${last_name}',(select id from address where id='${maxId}'),'${phone}','${email}','${type}','${isActive}','${activationToken}');`
+            if (type === 'REP') {
+                isVerified = 1
+            }
+
+            const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE,isActive,activationToken,isVerified) values('${first_name}','${last_name}',(select id from address where id='${maxId}'),'${phone}','${email}','${type}','${isActive}','${activationToken}','${isVerified}');`
             db.query(statement2, (error, data) => {
                 if (error) {
                     response.send(utils.createError(error))
@@ -96,11 +103,48 @@ router.post('/signup', (request, response) => {
                         }
                         else {
 
-                            mailer.sendEmail(email, 'Welcome to mystore', body, (error, info) => {
-                                console.log(error)
-                                console.log(info)
-                                response.send(utils.createResult(error, data))
-                            })
+                            if (type == 'REP') {
+                                htmlPath = path.join(__dirname, '/../templates/reporter-notification.html')
+                                body = '' + fs.readFileSync(htmlPath)
+                                body = body.replace('firstName', first_name)
+                                mailer.sendEmail(email, 'Public News Board ', body, (error, info) => {
+
+                                    if (error) {
+                                        response.send(utils.createError(error))
+                                    }
+                                    else {
+
+                                        mailer.sendEmailtoAdmin((error, info) => {
+                                            if (error) {
+                                                response.send(utils.createError(error))
+                                            }
+                                            else {
+                                                response.send(utils.createSuccess(info))
+
+                                            }
+
+                                        })
+
+
+                                    }
+                                })
+
+                            }
+                            else {
+
+                                htmlPath = path.join(__dirname, '/../templates/send_activation_link.html')
+                                body = '' + fs.readFileSync(htmlPath)
+                                body = body.replace('firstName', first_name)
+                                body = body.replace('logoLink', logoLink)
+                                body = body.replace('activationLink', activationLink)
+                                mailer.sendEmail(email, 'Public News Board ', body, (error, info) => {
+                                    console.log(error)
+                                    console.log(info)
+                                    response.send(utils.createResult(error, data))
+                                })
+                            }
+
+
                         }
                     })
                 }
@@ -123,7 +167,7 @@ router.post('/signin', (request, response) => {
             response.send({ status: 'error', error: error })
 
         } else {
-            console.log(users);
+
             if (users.length == 0) {
                 response.send({ status: 'error', error: 'user does not exist' })
             } else {

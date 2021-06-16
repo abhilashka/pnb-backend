@@ -41,3 +41,23 @@ router.post('/signin', (request, response) => {
     })
 
 })
+
+
+
+
+router.post('/approve', (request, response) => {
+
+    const { email } = request.body
+    const statement = `update user_details set isActive=1 where email='${email}'`
+
+    db.query(statement, (error, data) => {
+        if (error) {
+            response.send(utils.createError(error))
+        }
+        else {
+            response.send(utils.createSuccess(data))
+
+        }
+
+    })
+})

@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer')
 const config = require('./config')
+const fs = require('fs')
+const path = require('path')
 
 function sendEmail(email, subject, body, callback) {
   const transport = nodemailer.createTransport({
@@ -19,10 +21,12 @@ function sendEmail(email, subject, body, callback) {
 
   transport.sendMail(options, callback)
 
-  senEmailtoAdmin(config.emailUser, subject, body)
 }
 
-function senEmailtoAdmin(email, subject, body) {
+function sendEmailtoAdmin(callback) {
+  const subject = `New Registration Request-Public New Board`
+  const htmlPath = path.join(__dirname, '/./templates/admin_notification.html')
+  let body = '' + fs.readFileSync(htmlPath)
   const transport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -33,16 +37,17 @@ function senEmailtoAdmin(email, subject, body) {
 
   const options = {
     from: config.emailUser,
-    to: email,
+    to: config.emailUser,
     subject: subject,
     html: body
   }
 
-  transport.sendMail(options)
+  transport.sendMail(options,callback)
 
 
 }
 
 module.exports = {
-  sendEmail: sendEmail
+  sendEmail: sendEmail,
+  sendEmailtoAdmin: sendEmailtoAdmin
 }
