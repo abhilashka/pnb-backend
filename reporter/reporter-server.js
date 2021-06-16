@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const newsRouter = require('./routes/news/news')
 
 const reporterRouter = require('./routes/reporter/reporter')
+const newsSearch = require('./routes/news/search_news')
 const jwt = require('jsonwebtoken')
 
 const app = express()
@@ -45,6 +46,8 @@ app.use(getreporterId)
 app.use('/reporter', reporterRouter)
 
 app.use('/news', newsRouter)
+
+app.use('/newssearch',newsSearch)
 
 
 
