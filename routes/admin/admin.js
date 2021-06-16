@@ -64,4 +64,22 @@ router.post('/approve', (request, response) => {
 })
 
 
+router.get('/report', (request, response) => {
+
+    const statement = `select headline,report_ctr,report_reason from news_details where report_ctr>0;`
+
+    db.query(statement, (error, data) => {
+        if (error) {
+            response.send(utils.createError(error))
+        }
+        else {
+            
+            response.send(utils.createSuccess(data))
+
+        }
+
+    })
+})
+
+
 module.exports = router
