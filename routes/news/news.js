@@ -142,9 +142,6 @@ router.post('/upload-image', upload.single('articleImage'), (request, response) 
 
 
 
-// ---------------------------------------
-//                  GET
-// ---------------------------------------
 
 
 
