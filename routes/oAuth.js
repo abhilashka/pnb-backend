@@ -79,7 +79,9 @@ router.post('/signin', (request, response) => {
     db.query(statement, (error, reporters) => {
         if (error) {
             response.send({ status: 'error', error: error })
+            
         } else {
+            console.log(reporters);
             if (reporters.length == 0) {
                 response.send({ status: 'error', error: 'user does not exist' })
             } else {
