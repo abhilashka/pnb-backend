@@ -22,12 +22,21 @@ function getreporterId(request, response, next) {
         try {
             const token = request.headers['token']
             const data = jwt.verify(token, config.secret)
-        
+
             // add a new key named reporterId with logged in reporter's id
             request.reporterId = data['id']
+            
+            console.log("isActive " + request.headers['isActive'])
+
+            if (request.headers['isActive']) {
+                next()
+
+            }
+            else {
+                response.send({ status: 'success', error: 'you dont have access' })
+            }
             console.log('reporter id: ' + request.reporterId)
             // go to the actual route
-            next()
 
         } catch (ex) {
             response.status(401)
