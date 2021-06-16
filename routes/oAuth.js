@@ -4,10 +4,44 @@ const db = require('../db')
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
 const config = require('../config')
-
+const mailer = require('../mailer')
 const router = express.Router()
+const uuid = require('uuid')
+const fs = require('fs')
+const path = require('path')
+require('dotenv').config()
+
+const url = process.env.PROD_HOST
+const port = process.env.PROD_PORT
 
 
+
+// ---------------------------------------
+//                  GET
+// ---------------------------------------
+
+router.get('/activate/:token', (request, response) => {
+    const { token } = request.params
+
+    // activate the user
+    // reset the activation token
+    const statement = `update user_details set isVerified = 1, activationToken = '' where activationToken = '${token}'`
+    db.query(statement, (error, data) => {
+
+        const htmlPath = path.join(__dirname, '/../templates/activation_result.html')
+        const body = '' + fs.readFileSync(htmlPath)
+        response.header('Content-Type', 'text/html')
+        response.send(body)
+    })
+
+})
+
+
+
+
+// ---------------------------------------
+//                  POST
+// ---------------------------------------
 
 //sign up
 router.post('/signup', (request, response) => {
@@ -15,9 +49,22 @@ router.post('/signup', (request, response) => {
     const { first_name, last_name, phone, email, password, city, localities, state, pincode, type } = request.body;
     const encryptedPass = crypto.SHA256(password);
 
+    const activationToken = uuid.v4()
+    const activationLink = `${url}${port}/oAuth/activate/${activationToken}`
+    const logoLink = `./images/logo.svg`
+
+    console.log(activationLink)
+    console.log(logoLink)
+
+    let htmlPath = ``;
+    let body = ``;
+
+
     const statement1 = `insert into address(city,localities,state,pincode) VALUES('${city}','${localities}','${state}','${pincode}');`
 
+
     var isActive = 0;
+    var isVerified = 0;
 
     db.query(statement1, (error, data) => {
 
@@ -37,11 +84,14 @@ router.post('/signup', (request, response) => {
                 isActive = 1
             }
 
-            const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE,isActive) values('${first_name}','${last_name}',(select id from address where id='${maxId}'),'${phone}','${email}','${type}','${isActive}');`
+            if (type === 'REP') {
+                isVerified = 1
+            }
+
+            const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE,isActive,activationToken,isVerified) values('${first_name}','${last_name}',(select id from address where id='${maxId}'),'${phone}','${email}','${type}','${isActive}','${activationToken}','${isVerified}');`
             db.query(statement2, (error, data) => {
                 if (error) {
                     response.send(utils.createError(error))
-
                 }
                 else {
 
@@ -52,54 +102,99 @@ router.post('/signup', (request, response) => {
 
                         }
                         else {
-                            response.send(utils.createSuccess(data));
+
+                            if (type == 'REP') {
+                                htmlPath = path.join(__dirname, '/../templates/reporter-notification.html')
+                                body = '' + fs.readFileSync(htmlPath)
+                                body = body.replace('firstName', first_name)
+                                mailer.sendEmail(email, 'Public News Board ', body, (error, info) => {
+
+                                    if (error) {
+                                        response.send(utils.createError(error))
+                                    }
+                                    else {
+
+                                        mailer.sendEmailtoAdmin((error, info) => {
+                                            if (error) {
+                                                response.send(utils.createError(error))
+                                            }
+                                            else {
+                                                response.send(utils.createSuccess(info))
+
+                                            }
+
+                                        })
+
+
+                                    }
+                                })
+
+                            }
+                            else {
+
+                                htmlPath = path.join(__dirname, '/../templates/send_activation_link.html')
+                                body = '' + fs.readFileSync(htmlPath)
+                                body = body.replace('firstName', first_name)
+                                body = body.replace('logoLink', logoLink)
+                                body = body.replace('activationLink', activationLink)
+                                mailer.sendEmail(email, 'Public News Board ', body, (error, info) => {
+                                    console.log(error)
+                                    console.log(info)
+                                    response.send(utils.createResult(error, data))
+                                })
+                            }
 
 
                         }
                     })
-
                 }
-
             })
-
         }
     })
-
-
-
 });
+
+
 
 
 
 //sign in
 router.post('/signin', (request, response) => {
     const { email, password } = request.body
-    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive from user_details u join user_crdntl c  on u.id=c.user_id where u.email ='${email}' and c.passwd='${password}';`
+    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive,u.isVerified from user_details u join user_crdntl c  on u.id=c.user_id where u.email ='${email}' and c.passwd='${password}';`
 
-    db.query(statement, (error, reporters) => {
+    db.query(statement, (error, users) => {
         if (error) {
             response.send({ status: 'error', error: error })
-            
+
         } else {
-            console.log(reporters);
-            if (reporters.length == 0) {
+
+            if (users.length == 0) {
                 response.send({ status: 'error', error: 'user does not exist' })
             } else {
-                const reporter = reporters[0]
+                const user = users[0]
 
-                const token = jwt.sign({ id: reporter['id'], isActive: reporter['isActive'] }, config.secret)
+                if (user['isVerified'] == 1) {
+                    // user is an active user
+                    const token = jwt.sign({ id: user['id'], isActive: user['isActive'] }, config.secret)
+                    if (user['isActive']) {
 
-                if (reporter['isActive']) {
-                    response.send(utils.createResult(error, {
-                        first_name: reporter['first_name'],
-                        last_name: reporter['last_name'],
-                        isActive: reporter['isActive'],
-                        token: token
-                    }))
+                        response.send(utils.createResult(error, {
+                            first_name: user['first_name'],
+                            last_name: user['last_name'],
+                            isActive: user['isActive'],
+                            token: token
+                        }))
+                    }
+                    else {
+                        response.send({ status: "success", error: "you are reporter. your account is not active. please contact administrator" })
+                    }
                 }
                 else {
-                    response.send({ status: "success", error: "you dont have access" })
+                    // user is a suspended user
+                    response.send({ status: 'error', error: 'please verify your email' })
                 }
+
+
 
 
             }
@@ -108,6 +203,10 @@ router.post('/signin', (request, response) => {
 
 
 })
+
+
+
+
 
 
 module.exports = router
