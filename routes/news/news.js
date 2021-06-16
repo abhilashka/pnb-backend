@@ -25,12 +25,13 @@ router.use(bodyParser.json());
 
 
 
-router.post('/addnews', (request, response) => {
+router.post('/addnews', upload.single('articleImage'), (request, response) => {
     const { content, headline } = request.body;
 
-    const userid = request.reporterId
+    const userid = request.userId
+    const fileName = request.file.filename
 
-    const statement1 = `insert into news_header(reporter_id, address_id) VALUES('${userid}', (select address_id from user_details where id='${userid}'));`
+    const statement1 = `insert into news_header(reporter_id, address_id,image) VALUES('${userid}', (select address_id from user_details where id='${userid}'),'${fileName}');`
 
     db.query(statement1, (error, data) => {
         if (error) {
