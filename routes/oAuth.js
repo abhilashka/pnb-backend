@@ -87,7 +87,7 @@ router.post('/signin', (request, response) => {
             } else {
                 const reporter = reporters[0]
 
-                const token = jwt.sign({ id: reporter['id'] }, config.secret)
+                const token = jwt.sign({ id: reporter['id'], isActive: reporter['isActive'] }, config.secret)
 
                 if (reporter['isActive']) {
                     response.send(utils.createResult(error, {

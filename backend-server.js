@@ -30,10 +30,10 @@ function getuserId(request, response, next) {
 
             // add a new key named userId with logged in reporter's id
             request.userId = data['id']
+            console.log(data)
+            console.log("isActive " + data['isActive'])
 
-            console.log("isActive " + request.headers['isActive'])
-
-            if (request.headers['isActive']) {
+            if (data['isActive']) {
                 next()
 
             }

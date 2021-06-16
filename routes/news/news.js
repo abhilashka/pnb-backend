@@ -47,11 +47,39 @@ router.get('/newssearch', (request, response) => {
 
 
 // ---------------------------------------
-//                  POST
+//                  GET
 // ---------------------------------------
 
+router.get('/newssearch', (request, response) => {
+    const {
+        city,
+        localities,
+        state,
+        pincode,
+        header,
+    } = request.body;
+
+    const statement = `SELECT n.category,det.headline,det.content
+    FROM news_header n
+    INNER JOIN address ON n.address_id = address.id 
+    INNER JOIN news_details det ON n.id=det.header_id where det.headline ='best politics' or address.city ='' or address.localities = 'Boatclub' or address.state='' ;`
+    db.query(statement, (error, data) => {
+        if (error) {
+            response.send(utils.createError(error))
+            console.log(`error`)
+        }
+        else {
+            response.send(utils.createSuccess(data))
+            console.log(`data`)
+        }
+    })
+})
 
 
+
+// ---------------------------------------
+//                  POST
+// ---------------------------------------
 
 router.post('/addnews', upload.single('articleImage'), (request, response) => {
     const { content, headline } = request.body;
