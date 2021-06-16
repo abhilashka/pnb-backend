@@ -74,7 +74,7 @@ router.post('/signup', (request, response) => {
 //sign in
 router.post('/signin', (request, response) => {
     const { email, password } = request.body
-    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive from user_details u join user_crdntl c  on u.id=c.id where u.email ='${email}' and c.passwd='${password}';`
+    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive from user_details u join user_crdntl c  on u.id=c.user_id where u.email ='${email}' and c.passwd='${password}';`
 
     db.query(statement, (error, reporters) => {
         if (error) {
