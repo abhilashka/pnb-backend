@@ -57,7 +57,7 @@ app.use(getuserId)
 app.use('/reporter', reporterRouter)
 app.use('/news', newsRouter)
 app.use('/oAuth', oauthRouter)
-app.use('/admin', oauthRouter)
+app.use('/admin', adminRouter)
 
 
 

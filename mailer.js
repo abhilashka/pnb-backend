@@ -42,12 +42,41 @@ function sendEmailtoAdmin(callback) {
     html: body
   }
 
-  transport.sendMail(options,callback)
+  transport.sendMail(options, callback)
 
 
 }
 
+
+function sendEmailtoReporter(callback) {
+  const subject = `Public New Board-Res`
+  const htmlPath = path.join(__dirname, '/./templates/admin_notification.html')
+  let body = '' + fs.readFileSync(htmlPath)
+  const transport = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: config.emailUser,
+      pass: config.emailPassword
+    }
+  })
+
+  const options = {
+    from: config.emailUser,
+    to: config.emailUser,
+    subject: subject,
+    html: body
+  }
+
+  transport.sendMail(options, callback)
+
+
+}
+
+
+
+
 module.exports = {
   sendEmail: sendEmail,
-  sendEmailtoAdmin: sendEmailtoAdmin
+  sendEmailtoAdmin: sendEmailtoAdmin,
+  sendEmailtoReporter: sendEmailtoReporter
 }
