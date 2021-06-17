@@ -67,6 +67,69 @@ router.get("/newssearch", (request, response) => {
   });
 });
 
+
+
+//get all news
+/**
+ * @swagger
+ *
+ * /news/newssearch:
+ *   get:
+ *     description: To get all news based
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
+//get news 
+router.get('/', (request, response) => {
+  const statement = `SELECT * FROM news_details;;`
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error))
+      console.log(`error`)
+    }
+    else {
+      response.send(utils.createSuccess(data))
+      console.log(`data`)
+    }
+  })
+})
+
+
+
+//Towns/Cities/localities
+/**
+ * @swagger
+ *
+ * /news/newssearch:
+ *   get:
+ *     description: To get news based on Towns/Cities/localities
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
+router.get('/getnews', (request, response) => {
+  let id = request.reporterId
+  const statement = `SELECT news_details.headline, news_details.content,address.city
+  FROM news_details
+  INNER JOIN address ON news_details.id = address.id where news_details.id = ${id} and address.id = ${id};`
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error))
+      console.log(`error`)
+    }
+    else {
+      response.send(utils.createSuccess(data))
+      console.log(`data`)
+    }
+  })
+
+})
+
 // ---------------------------------------
 //                  POST
 // ---------------------------------------
