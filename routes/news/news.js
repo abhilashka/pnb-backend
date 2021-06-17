@@ -111,7 +111,8 @@ router.put("/reportnews", (request, response) => {
           WHERE id ='${newsId}';`;
             
       }else{
-         statement = `UPDATE news_details    
+         statement = `UPDATE news_details   
+          
           SET
              report_reason=CONCAT(report_reason,'#','${report_reason}'), 
              report_ctr=report_ctr +1
