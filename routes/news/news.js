@@ -88,7 +88,7 @@ router.post('/upload-image', upload.single('articleImage'), (request, response) 
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
-
+//get news 
 router.get('/', (request, response) => {
     const statement = `SELECT * FROM pnb.news_details;;`
     db.query(statement, (error, data) => {
