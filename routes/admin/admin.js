@@ -4,7 +4,7 @@ const db = require('../../db')
 const crypto = require('crypto-js')
 const jwt = require('jsonwebtoken')
 const config = require('../../config')
-
+const mailer = require('../../mailer')
 const router = express.Router()
 
 
@@ -55,8 +55,18 @@ router.post('/approve', (request, response) => {
             response.send(utils.createError(error))
         }
         else {
-            
-            response.send(utils.createSuccess(data))
+
+            mailer.sendEmailtoReporter(email,(error, data) => {
+                if (error) {
+                    response.send(utils.createError(error))
+
+                }
+                else {
+                    response.send(utils.createSuccess(data))
+
+                }
+
+            })
 
         }
 
@@ -73,7 +83,7 @@ router.get('/report', (request, response) => {
             response.send(utils.createError(error))
         }
         else {
-            
+
             response.send(utils.createSuccess(data))
 
         }

@@ -48,9 +48,9 @@ function sendEmailtoAdmin(callback) {
 }
 
 
-function sendEmailtoReporter(callback) {
-  const subject = `Public New Board-Res`
-  const htmlPath = path.join(__dirname, '/./templates/admin_notification.html')
+function sendEmailtoReporter(email, callback) {
+  const subject = `Public New Board - Account is Active now  `
+  const htmlPath = path.join(__dirname, '/./templates/reporter-activation.html')
   let body = '' + fs.readFileSync(htmlPath)
   const transport = nodemailer.createTransport({
     service: 'gmail',
@@ -62,7 +62,7 @@ function sendEmailtoReporter(callback) {
 
   const options = {
     from: config.emailUser,
-    to: config.emailUser,
+    to: email,
     subject: subject,
     html: body
   }
