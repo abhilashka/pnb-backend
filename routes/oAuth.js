@@ -19,7 +19,18 @@ const port = process.env.PROD_PORT
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
-
+/**
+ * @swagger
+ *
+ * /oAuth/activate/:token:
+ *   get:
+ *     description: For Activating readers account after verifying a email
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
 router.get('/activate/:token', (request, response) => {
     const { token } = request.params
 
@@ -44,6 +55,69 @@ router.get('/activate/:token', (request, response) => {
 // ---------------------------------------
 
 //sign up
+/**
+ * @swagger
+ *
+ * /oAuth/signup:
+ *   post:
+ *     description: For signup of  reader/reporter 
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: first_name
+ *         description: first_name of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: last_name
+ *         description: last_name of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: phone
+ *         description: phone of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: email
+ *         description: email of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: password
+ *         description: password of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: city
+ *         description: city of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: localities
+ *         description: localities of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: state
+ *         description: state of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: pincode
+ *         description: pincode of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: type
+ *         description: type of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
 router.post('/signup', (request, response) => {
 
     const { first_name, last_name, phone, email, password, city, localities, state, pincode, type } = request.body;
@@ -158,6 +232,30 @@ router.post('/signup', (request, response) => {
 
 
 //sign in
+//sign up
+/**
+ * @swagger
+ *
+ * /oAuth/signin:
+ *   post:
+ *     description: For signin of  reader/reporter 
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: email
+ *         description: email of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *       - name: password
+ *         description: password of reader/reporter
+ *         in: formData
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
 router.post('/signin', (request, response) => {
     const { email, password } = request.body
     const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive,u.isVerified from user_details u join user_crdntl c  on u.id=c.user_id where u.email ='${email}' and c.passwd='${password}';`
