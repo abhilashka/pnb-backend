@@ -2,14 +2,52 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const config = require('./config')
+const cors = require('cors')
+
+// morgan: for logging
+const morgan = require('morgan')
+
+// swagger: for api documentation
+const swaggerJSDoc = require('swagger-jsdoc')
+const swaggerUi = require('swagger-ui-express')
+
 const app = express()
+app.use(cors('*'))
+
+app.use(bodyParser.json())
+app.use(morgan('combined'))
+
 // router import 
 const newsRouter = require('./routes/news/news')
 const reporterRouter = require('./routes/reporter/reporter')
 const oauthRouter = require('./routes/oAuth')
 const adminRouter = require('./routes/admin/admin')
 
-app.use(bodyParser.json())
+
+var options = {
+    swaggerOptions: {
+        authAction: { JWT: { name: "JWT", schema: { type: "apiKey", in: "header", name: "Authorization", description: "" }, value: "Bearer <JWT>" } }
+    }
+};
+
+// swagger init
+const swaggerOptions = {
+    definition: {
+        info: {
+            title: 'Public News Board Server ',
+            version: '1.0.0',
+            description: 'This is a Express server for Public News Board application'
+        }
+    },
+    apis: [
+        './routes/admin/*.js',
+        './routes/news/*.js',
+        './routes/oAuth.js'
+    ]
+
+}
+const swaggerSpec = swaggerJSDoc(swaggerOptions)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, options));
 
 function getuserId(request, response, next) {
 
@@ -61,9 +99,9 @@ app.use('/admin', adminRouter)
 
 
 
-
+// default route
 app.get('/', (request, response) => {
-    response.send('welcome to my application')
+    response.send('welcome to Public News Board application')
 })
 
 app.listen(4000, '0.0.0.0', () => {
