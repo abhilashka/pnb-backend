@@ -1,0 +1,5 @@
+projectKey=pnb-backend-key
+serverUrl=http://172.27.12.78
+dashboardUrl=http://172.27.12.78/dashboard/index/pnb-backend-key
+ceTaskId=AXotbtpea_m12xx6Rv7O
+ceTaskUrl=http://172.27.12.78/api/ce/task?id=AXotbtpea_m12xx6Rv7O
