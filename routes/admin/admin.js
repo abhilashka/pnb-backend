@@ -88,7 +88,7 @@ router.post('/signin', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.post('/approve', (request, response) => {
+ router.post('/approve', (request, response) => {
 
     const { email } = request.body
     const statement = `update user_details set isActive=1 where email='${email}'`
