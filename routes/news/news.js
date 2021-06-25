@@ -84,7 +84,7 @@ router.get("/newssearch", (request, response) => {
  */
 //get news 
 router.get('/', (request, response) => {
-  const statement = `SELECT * FROM news_details;;`
+  const statement = `SELECT content,headline FROM news_details;`
   db.query(statement, (error, data) => {
     if (error) {
       response.send(utils.createError(error))
@@ -96,6 +96,7 @@ router.get('/', (request, response) => {
     }
   })
 })
+
 
 
 
@@ -112,21 +113,39 @@ router.get('/', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.get('/getnews', (request, response) => {
-  let id = request.reporterId
-  const statement = `SELECT news_details.headline, news_details.content,address.city
-  FROM news_details
-  INNER JOIN address ON news_details.id = address.id where news_details.id = ${id} and address.id = ${id};`
+ router.get('/getnews', (request, response) => {
+  let id = request.userId
+  console.log('id: '+id)
+  const aid_st = ` select address_id from user_details
+  where id=${id};`
+  var address_id
+  db.query(aid_st, (error, data) => {
+  if (error) {
+    response.send(utils.createError(error))
+   
+  }
+  else {
+   
+    console.log(data[0].address_id);
+    address_id = data[0].address_id;
+    const statement = `select ndet.headline,ndet.content
+    from news_header nhead
+    inner join address on nhead.address_id = address.id
+    inner join news_details ndet on ndet.header_id = nhead.id 
+    where address.id=${address_id}`
+
   db.query(statement, (error, data) => {
     if (error) {
-      response.send(utils.createError(error))
-      console.log(`error`)
-    }
-    else {
-      response.send(utils.createSuccess(data))
-      console.log(`data`)
-    }
-  })
+    response.send(utils.createError(error))
+    console.log(error);
+  }
+  else {
+    response.send(utils.createSuccess(data))
+    console.log(data);
+  }
+})
+  }
+})
 
 })
 
