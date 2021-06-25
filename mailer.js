@@ -48,10 +48,12 @@ function sendEmailtoAdmin(callback) {
 }
 
 
-function sendEmailtoReporter(email, callback) {
+function sendEmailtoReporter(email, name, callback) {
   const subject = `Public New Board - Account is Active now  `
   const htmlPath = path.join(__dirname, '/./templates/reporter-activation.html')
   let body = '' + fs.readFileSync(htmlPath)
+  body = body.replace('firstName', name)
+
   const transport = nodemailer.createTransport({
     service: 'gmail',
     auth: {

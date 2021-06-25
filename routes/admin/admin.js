@@ -91,9 +91,8 @@ router.post('/signin', (request, response) => {
 router.post('/handlerequest', (request, response) => {
 
     const { email, type } = request.body
-    console.log("email, type ", email, type)
 
-    const statement = `update user_details set isActive=1 where email='${email}'`
+    const statement = `update user_details set isActive='${type}' where email='${email}'`
 
     db.query(statement, (error, data) => {
         if (error) {
@@ -101,17 +100,41 @@ router.post('/handlerequest', (request, response) => {
         }
         else {
 
-            mailer.sendEmailtoReporter(email, (error, data) => {
+            const statement = `select first_name ,last_name,id from user_details where email='${email}';`
+
+            db.query(statement, (error, data) => {
                 if (error) {
                     response.send(utils.createError(error))
-
                 }
                 else {
-                    response.send(utils.createSuccess(data))
+                    const name = data[0].first_name + " " + data[0].last_name;
+                    const id = data[0].id;
+                    const statement = `delete from request where user_details='${id}';`
+                    db.query(statement, (error, data) => {
+                        if (error) {
+                            response.send(utils.createError(error))
+                        }
+                        else {
+                            mailer.sendEmailtoReporter(email, name, (error, data) => {
+                                if (error) {
+                                    response.send(utils.createError(error))
+
+                                }
+                                else {
+                                    response.send(utils.createSuccess(data))
+
+                                }
+
+                            })
+                        }
+                    })
+
+
 
                 }
-
             })
+
+
 
         }
 
