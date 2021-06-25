@@ -64,12 +64,13 @@ function getuserId(request, response, next) {
 
         try {
             const token = request.headers['token']
+            console.log("||request.url.startsWith -> token", token)
             const data = jwt.verify(token, config.secret)
+            console.log("||request.url.startsWith -> data", data)
 
             // add a new key named userId with logged in reporter's id
             request.userId = data['id']
-            console.log(data)
-            console.log("isActive " + data['isActive'])
+
 
             if (data['isActive']) {
                 next()
