@@ -187,17 +187,45 @@ router.post('/signup', (request, response) => {
                                         response.send(utils.createError(error))
                                     }
                                     else {
-
-                                        mailer.sendEmailtoAdmin((error, info) => {
+                                        const stm = `SELECT MAX(id) AS MaxId FROM user_details`;
+                                        let userid
+                                        db.query(stm, (error, data) => {
                                             if (error) {
                                                 response.send(utils.createError(error))
+
                                             }
                                             else {
-                                                response.send(utils.createSuccess(info))
+                                                userid = data[0].MaxId;
+                                                console.log("userid", userid)
 
+                                                const statement = `insert into request(user_details) values('${userid}') `
+
+                                                db.query(statement, (error, data) => {
+                                                    if (error) {
+                                                        response.send(utils.createError(error))
+
+                                                    }
+                                                    else {
+                                                        console.log("data", data)
+                                                        mailer.sendEmailtoAdmin((error, info) => {
+                                                            if (error) {
+                                                                response.send(utils.createError(error))
+                                                            }
+                                                            else {
+                                                                response.send(utils.createSuccess(info))
+
+                                                            }
+
+                                                        })
+
+                                                    }
+                                                })
                                             }
-
                                         })
+
+
+
+
 
 
                                     }
