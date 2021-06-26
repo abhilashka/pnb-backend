@@ -75,7 +75,7 @@ router.post('/signin', (request, response) => {
  *
  * /admin/approve:
  *   post:
- *     description: For signin administrator profile
+ *     description: To approve/reject reporter request
  *     produces:
  *       - application/json
  *     parameters:
@@ -84,6 +84,11 @@ router.post('/signin', (request, response) => {
  *         in: formData
  *         required: true
  *         type: string
+ *       - name: type
+ *         description: 0 or 1 to approve/ reject
+ *         in: formData
+ *         required: true
+ *         type: boolean
  *     responses:
  *       200:
  *         description: successful message
@@ -142,6 +147,47 @@ router.post('/handlerequest', (request, response) => {
 })
 
 
+/**
+ * @swagger
+ *
+ * /admin/handlenews:
+ *   post:
+ *     description: To block unblock  particular news
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: id
+ *         description: id of news 
+ *         in: formData
+ *         required: true
+ *         type: int
+ *       - name: type
+ *         description: 0 or 1 to block/ unblock
+ *         in: formData
+ *         required: true
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
+router.post('/handlenews', (request, response) => {
+
+    const { id, type } = request.body
+    console.log("id, type", id, type)
+
+    const statement = `update news_details set isActive='${type}' where id='${id}';`
+
+    db.query(statement, (error, data) => {
+        if (error) {
+            response.send(utils.createError(error))
+        }
+        else {
+
+            response.send(utils.createSuccess(data))
+        }
+    })
+})
+
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
@@ -159,7 +205,7 @@ router.post('/handlerequest', (request, response) => {
  */
 router.get('/report', (request, response) => {
 
-    const statement = `select headline,report_ctr,report_reason from news_details where report_ctr>0;`
+    const statement = `select id,headline,report_ctr,report_reason,isActive from news_details where report_ctr>0;`
 
     db.query(statement, (error, data) => {
         if (error) {
