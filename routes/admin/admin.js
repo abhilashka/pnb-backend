@@ -70,6 +70,7 @@ router.post('/signin', (request, response) => {
 
 
 
+
 /**
  * @swagger
  *
@@ -145,6 +146,27 @@ router.post('/handlerequest', (request, response) => {
 // ---------------------------------------
 //                  GET
 // ---------------------------------------
+
+
+router.get("/getprofile", (request, response) => {
+    const { type } = request.body;
+  
+    const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
+    FROM ((user_details
+    INNER JOIN address ON user_details.address_id = address.id)
+    INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where type='${type}';`
+    db.query(statement, (error, data) => {
+      if (error) {
+        response.send(utils.createError(error));
+        console.log(`error`);
+      } else {
+        response.send(utils.createSuccess(data));
+        console.log(`data`);
+      }
+    });
+  });
+
+
 /**
  * @swagger
  *
