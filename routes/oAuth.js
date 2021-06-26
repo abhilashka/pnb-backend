@@ -49,12 +49,12 @@ router.get('/activate/:token', (request, response) => {
 
 //GET PROFILE
 router.get("/getprofile", (request, response) => {
-    const { type } = request.body;
+    const { email } = request.body;
   
     const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
     FROM ((user_details
     INNER JOIN address ON user_details.address_id = address.id)
-    INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where type='${type}';`
+    INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where email='${email}';`
     db.query(statement, (error, data) => {
       if (error) {
         response.send(utils.createError(error));
