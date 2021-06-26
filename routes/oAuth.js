@@ -47,7 +47,7 @@ router.get('/activate/:token', (request, response) => {
 
 })
 
-//GET PROFILE
+
 router.get("/getprofile", (request, response) => {
     const { email } = request.body;
   
