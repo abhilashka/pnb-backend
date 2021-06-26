@@ -19,7 +19,10 @@ router.use(bodyParser.json());
 
 //get all news
 router.post('/addnews', (request, response) => {
-    const statement = `select header_id, content, headline from news_details;`
+  const {header_id,content, headline}=request.body
+    const statement =`insert into news_details ( header_id, content, headline, report_ctr, report_reason) 
+    values ('${header_id}', '${content}', '${headline}', 0, '${null}')`
+    //const statement = `select header_id, content, headline from news_details;`
     db.query(statement, (error, data) => {
         if (error) {
             response.send(utils.createError(error))
