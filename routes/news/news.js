@@ -1,14 +1,25 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-
 const crypto = require("crypto-js");
 const jwt = require("jsonwebtoken");
 const utils = require("../../utils");
 const db = require("../../db");
 const config = require("../../config");
 const multer = require("multer");
+const upload = multer({ dest: 'uploads/' })
 const e = require("express");
-const upload = multer({ dest: "images/" });
+const fs = require('fs');
+const AWS = require('aws-sdk');
+const pkg = require('../../package.json')
+
+const util = require('util')
+const unlinkFile = util.promisify(fs.unlink)
+
+const { uploadFile } = require('../../s3')
+
+const app = express()
+
+
 
 const router = express.Router();
 
@@ -104,7 +115,7 @@ router.get('/', (request, response) => {
 /**
  * @swagger
  *
- * /news/newssearch:
+ * /news/newsbyaddress:
  *   get:
  *     description: To get news based on Towns/Cities/localities
  *     produces:
@@ -113,39 +124,40 @@ router.get('/', (request, response) => {
  *       200:
  *         description: successful message
  */
- router.get('/getnews', (request, response) => {
+router.get('/newsbyaddress', (request, response) => {
   let id = request.userId
-  console.log('id: '+id)
+  console.log("request.userId", request.userId)
+  console.log("request.userIdd")
+
   const aid_st = ` select address_id from user_details
   where id=${id};`
   var address_id
   db.query(aid_st, (error, data) => {
-  if (error) {
-    response.send(utils.createError(error))
-   
-  }
-  else {
-   
-    console.log(data[0].address_id);
-    address_id = data[0].address_id;
-    const statement = `select ndet.headline,ndet.content
+    if (error) {
+      response.send(utils.createError(error))
+
+    }
+    else {
+
+
+      address_id = data[0].address_id;
+      console.log("data[0].address_id", data[0].address_id)
+      const statement = `select ndet.headline,ndet.content,nhead.image,nhead.date,nhead.category
     from news_header nhead
     inner join address on nhead.address_id = address.id
     inner join news_details ndet on ndet.header_id = nhead.id 
     where address.id=${address_id}`
 
-  db.query(statement, (error, data) => {
-    if (error) {
-    response.send(utils.createError(error))
-    console.log(error);
-  }
-  else {
-    response.send(utils.createSuccess(data))
-    console.log(data);
-  }
-})
-  }
-})
+      db.query(statement, (error, data) => {
+        if (error) {
+          response.send(utils.createError(error))
+        }
+        else {
+          response.send(utils.createSuccess(data))
+        }
+      })
+    }
+  })
 
 })
 
@@ -177,11 +189,25 @@ router.get('/', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.post("/addnews", upload.single("articleImage"), (request, response) => {
+router.post("/addnews", upload.single("image"), async (request, response) => {
   const { content, headline } = request.body;
 
+  
+
+  const fileName =  process.env.AWS_HOST_URL + request.file.filename;
+  console.log("fileName", fileName)
+
+  const file = request.file
+  console.log("request.file", request.file)
+
+
+
   const userid = request.userId;
-  const fileName = request.file.filename;
+  console.log("request.file.filename", request.file.originalname)
+
+
+
+
 
   const statement1 = `insert into news_header(reporter_id, address_id,image) VALUES('${userid}', (select address_id from user_details where id='${userid}'),'${fileName}');`;
 
@@ -197,10 +223,23 @@ router.post("/addnews", upload.single("articleImage"), (request, response) => {
         } else {
           maxId = data[0].MaxId;
           const statement2 = `insert into news_details(header_id,content,headline) VALUES('${maxId}','${content}','${headline}' );`;
-          db.query(statement2, (error, data) => {
+          db.query(statement2, async (error, data) => {
             if (error) {
               response.send(utils.createError(error));
             } else {
+
+
+              const file = request.file
+              console.log(file)
+
+              // apply filter
+              // resize 
+
+              const result = await uploadFile(file)
+              await unlinkFile(file.path)
+              console.log(result)
+
+
               response.send(utils.createSuccess(data));
             }
           });
@@ -209,6 +248,11 @@ router.post("/addnews", upload.single("articleImage"), (request, response) => {
     }
   });
 });
+
+
+
+
+
 
 
 
