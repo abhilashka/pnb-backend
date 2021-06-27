@@ -207,7 +207,7 @@ router.post('/handlenews', (request, response) => {
  */
 router.get("/getprofile", (request, response) => {
 
-  
+
     const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
     FROM ((user_details
     INNER JOIN address ON user_details.address_id = address.id)
