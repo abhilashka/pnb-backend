@@ -193,24 +193,36 @@ router.post('/handlenews', (request, response) => {
 //                  GET
 // ---------------------------------------
 
-
+/**
+ * @swagger
+ *
+ * /admin/getprofile:
+ *   get:
+ *     description: To get profile of admin
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
 router.get("/getprofile", (request, response) => {
-   
+
   
     const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
     FROM ((user_details
     INNER JOIN address ON user_details.address_id = address.id)
     INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where type="ADM";`
+
     db.query(statement, (error, data) => {
-      if (error) {
-        response.send(utils.createError(error));
-        console.log(`error`);
-      } else {
-        response.send(utils.createSuccess(data));
-        console.log(`data`);
-      }
+        if (error) {
+            response.send(utils.createError(error));
+            console.log(`error`);
+        } else {
+            response.send(utils.createSuccess(data));
+            console.log(`data`);
+        }
     });
-  });
+});
 
 
 /**
@@ -288,7 +300,7 @@ router.get('/reporter-request', (request, response) => {
  */
 router.get('/users', (request, response) => {
 
-    const statement = `select first_name,last_name,email,phone,TYPE  from  user_details;`
+    const statement = `select first_name,last_name,email,phone,TYPE,isActive  from  user_details;`
 
     db.query(statement, (error, data) => {
         if (error) {
@@ -332,8 +344,9 @@ router.get('/users', (request, response) => {
  */
 router.put("/blockuser", (request, response) => {
 
-    const { userId } = request.body;
-    const statement = `update user_details set isActive=0 where id=${userId}`
+    const { email, isActive } = request.body;
+    console.log(" email,isActive ", email, isActive)
+    const statement = `update user_details set isActive='${isActive}' where email='${email}'`
     db.query(statement, (error, data) => {
 
         if (error) {

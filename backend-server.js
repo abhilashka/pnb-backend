@@ -3,6 +3,12 @@ const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const config = require('./config')
 const cors = require('cors')
+const fs = require('fs');
+
+const util = require('util')
+
+const multer = require("multer");
+
 
 // morgan: for logging
 const morgan = require('morgan')
