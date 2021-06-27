@@ -190,11 +190,12 @@ router.get('/newsbyaddress', (request, response) => {
  *         description: successful message
  */
 router.post("/addnews", upload.single("image"), async (request, response) => {
-  const { content, headline } = request.body;
+  const { content, headline, category } = request.body;
 
-  
+  console.log("request", request)
 
-  const fileName =  process.env.AWS_HOST_URL + request.file.filename;
+
+  const fileName = process.env.AWS_HOST_URL + request.file.filename;
   console.log("fileName", fileName)
 
   const file = request.file
@@ -209,7 +210,7 @@ router.post("/addnews", upload.single("image"), async (request, response) => {
 
 
 
-  const statement1 = `insert into news_header(reporter_id, address_id,image) VALUES('${userid}', (select address_id from user_details where id='${userid}'),'${fileName}');`;
+  const statement1 = `insert into news_header(reporter_id, address_id,image,category) VALUES('${userid}', (select address_id from user_details where id='${userid}'),'${fileName}','${category}');`;
 
   db.query(statement1, (error, data) => {
     if (error) {
