@@ -93,9 +93,36 @@ router.get("/newssearch", (request, response) => {
  *       200:
  *         description: successful message
  */
-//get news 
 router.get('/', (request, response) => {
-  const statement = `SELECT d.content,d.headline,h.category,h.image from news_header h join news_details d  on h.id=d.header_id  ;`
+  const statement = `SELECT d.id,d.content,d.headline,h.category,h.image from news_header h join news_details d  on h.id=d.header_id  ;`
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error))
+      console.log(`error`)
+    }
+    else {
+      response.send(utils.createSuccess(data))
+      console.log(`data`)
+    }
+  })
+})
+
+/**
+ * @swagger
+ *
+ * /news/getnewsbyid:
+ *   get:
+ *     description: To get news by id
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
+router.post('/getnewsbyid', (request, response) => {
+  const { id } = request.body
+  console.log("id", id)
+  const statement = `SELECT d.content,d.headline,h.category,h.image from news_header h join news_details d  on h.id=d.header_id where d.id='${id}' ;`
   db.query(statement, (error, data) => {
     if (error) {
       response.send(utils.createError(error))
@@ -142,7 +169,7 @@ router.get('/newsbyaddress', (request, response) => {
 
       address_id = data[0].address_id;
       console.log("data[0].address_id", data[0].address_id)
-      const statement = `select ndet.headline,ndet.content,nhead.image,nhead.date,nhead.category
+      const statement = `select ndet.id,ndet.headline,ndet.content,nhead.image,nhead.date,nhead.category
     from news_header nhead
     inner join address on nhead.address_id = address.id
     inner join news_details ndet on ndet.header_id = nhead.id 
@@ -159,6 +186,32 @@ router.get('/newsbyaddress', (request, response) => {
     }
   })
 
+})
+
+/* @swagger
+ *
+ * /news/newsbycategory:
+ *   get:
+ *     description: To get news based on category
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: successful message
+ */
+router.post('/newsbycategory', (request, response) => {
+  const { category } = request.body
+  const statement = `SELECT d.content,d.headline,h.category,h.image from news_header h join news_details d  on h.id=d.header_id where h.category='${category}' ;`
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error))
+      console.log(`error`)
+    }
+    else {
+      response.send(utils.createSuccess(data))
+      console.log(`data`)
+    }
+  })
 })
 
 // ---------------------------------------

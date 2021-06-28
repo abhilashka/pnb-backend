@@ -185,7 +185,13 @@ router.post('/signup', (request, response) => {
             const statement2 = `insert into user_details(first_name,last_name,address_id,phone,email,TYPE,isActive,activationToken,isVerified) values('${first_name}','${last_name}',(select id from address where id='${maxId}'),'${phone}','${email}','${type}','${isActive}','${activationToken}','${isVerified}');`
             db.query(statement2, (error, data) => {
                 if (error) {
-                    response.send(utils.createError(error))
+
+                    console.log("error", error.sqlMessage)
+                    if (error.sqlMessage.includes("user_details.phone")) {
+                        response.send(utils.createError("phone"))
+                    } else {
+                        response.send(utils.createError("email"))
+                    }
                 }
                 else {
 
@@ -193,6 +199,7 @@ router.post('/signup', (request, response) => {
                     db.query(statement, (error, data) => {
                         if (error) {
                             response.send(utils.createError(error))
+
 
                         }
                         else {
@@ -318,12 +325,12 @@ router.post('/signin', (request, response) => {
                 response.send({ status: 'error', error: 'user does not exist' })
             } else {
                 const user = users[0]
-                
+
                 if (user['isVerified'] == 1) {
                     // user is an active user
                     const token = jwt.sign({ id: user['id'], isActive: user['isActive'] }, config.secret)
                     if (user['isActive']) {
-                        
+
                         console.log("user['isVerified']", user['isVerified'])
                         response.send(utils.createResult(error, {
                             first_name: user['first_name'],
