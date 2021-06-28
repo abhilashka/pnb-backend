@@ -50,21 +50,21 @@ router.get('/activate/:token', (request, response) => {
 
 router.get("/getprofile", (request, response) => {
     const { email } = request.body;
-  
+
     const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
     FROM ((user_details
     INNER JOIN address ON user_details.address_id = address.id)
     INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where email='${email}';`
     db.query(statement, (error, data) => {
-      if (error) {
-        response.send(utils.createError(error));
-        console.log(`error`);
-      } else {
-        response.send(utils.createSuccess(data));
-        console.log(`data`);
-      }
+        if (error) {
+            response.send(utils.createError(error));
+            console.log(`error`);
+        } else {
+            response.send(utils.createSuccess(data));
+            console.log(`data`);
+        }
     });
-  });
+});
 
 
 
@@ -306,7 +306,7 @@ router.post('/signup', (request, response) => {
  */
 router.post('/signin', (request, response) => {
     const { email, password } = request.body
-    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive,u.isVerified from user_details u join user_crdntl c  on u.id=c.user_id where u.email ='${email}' and c.passwd='${password}';`
+    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive,u.isVerified,u.TYPE from user_details u join user_crdntl c  on u.id=c.user_id where u.email ='${email}' and c.passwd='${password}';`
 
     db.query(statement, (error, users) => {
         if (error) {
@@ -318,16 +318,19 @@ router.post('/signin', (request, response) => {
                 response.send({ status: 'error', error: 'user does not exist' })
             } else {
                 const user = users[0]
-
+                
                 if (user['isVerified'] == 1) {
                     // user is an active user
                     const token = jwt.sign({ id: user['id'], isActive: user['isActive'] }, config.secret)
                     if (user['isActive']) {
-
+                        
+                        console.log("user['isVerified']", user['isVerified'])
                         response.send(utils.createResult(error, {
                             first_name: user['first_name'],
                             last_name: user['last_name'],
                             isActive: user['isActive'],
+                            type: user['TYPE'],
+                            isVerified: user['isVerified'],
                             token: token
                         }))
                     }

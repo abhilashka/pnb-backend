@@ -95,7 +95,7 @@ router.get("/newssearch", (request, response) => {
  */
 //get news 
 router.get('/', (request, response) => {
-  const statement = `SELECT content,headline FROM news_details;`
+  const statement = `SELECT d.content,d.headline,h.category,h.image from news_header h join news_details d  on h.id=d.header_id  ;`
   db.query(statement, (error, data) => {
     if (error) {
       response.send(utils.createError(error))
