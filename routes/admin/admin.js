@@ -1,13 +1,11 @@
-const express = require('express')
-const utils = require('../../utils')
-const db = require('../../db')
-const crypto = require('crypto-js')
-const jwt = require('jsonwebtoken')
-const config = require('../../config')
-const mailer = require('../../mailer')
-const router = express.Router()
-
-
+const express = require("express");
+const utils = require("../../utils");
+const db = require("../../db");
+const crypto = require("crypto-js");
+const jwt = require("jsonwebtoken");
+const config = require("../../config");
+const mailer = require("../../mailer");
+const router = express.Router();
 // ---------------------------------------
 //                  POST
 // ---------------------------------------
@@ -35,41 +33,37 @@ const router = express.Router()
  *       200:
  *         description: successful message
  */
-router.post('/signin', (request, response) => {
-    const { email, password } = request.body
-    const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive from user_details u join user_crdntl c  on u.id=c.id where u.email ='${email}' and c.passwd='${password}';`
-
-
-    db.query(statement, (error, admins) => {
-        if (error) {
-            response.send({ status: 'error', error: error })
+router.post("/signin", (request, response) => {
+  const { email, password } = request.body;
+  const statement = `select u.email,c.passwd,u.id,u.first_name,u.last_name,u.isActive from user_details u join user_crdntl c  on u.id=c.id where u.email ='${email}' and c.passwd='${password}';`;
+  db.query(statement, (error, admins) => {
+    if (error) {
+      response.send({ status: "error", error: error });
+    } else {
+      if (admins.length == 0) {
+        response.send({ status: "error", error: "admin does not exist" });
+      } else {
+        const admin = admins[0];
+        const token = jwt.sign(
+          { id: admin["id"], isActive: admin["isActive"] },
+          config.secret
+        );
+        if (admin["isActive"]) {
+          response.send(
+            utils.createResult(error, {
+              first_name: admin["first_name"],
+              last_name: admin["last_name"],
+              isActive: admin["isActive"],
+              token: token,
+            })
+          );
         } else {
-            if (admins.length == 0) {
-                response.send({ status: 'error', error: 'admin does not exist' })
-            } else {
-                const admin = admins[0]
-
-                const token = jwt.sign({ id: admin['id'], isActive: admin['isActive'] }, config.secret)
-
-                if (admin['isActive']) {
-                    response.send(utils.createResult(error, {
-                        first_name: admin['first_name'],
-                        last_name: admin['last_name'],
-                        isActive: admin['isActive'],
-                        token: token
-                    }))
-                }
-                else {
-                    response.send({ status: "success", error: "you dont have access" })
-                }
-            }
+          response.send({ status: "success", error: "you dont have access" });
         }
-    })
-
-})
-
-
-
+      }
+    }
+  });
+});
 
 /**
  * @swagger
@@ -81,7 +75,7 @@ router.post('/signin', (request, response) => {
  *       - application/json
  *     parameters:
  *       - name: email
- *         description: email of reporter for which request to made 
+ *         description: email of reporter for which request to made
  *         in: formData
  *         required: true
  *         type: string
@@ -94,59 +88,39 @@ router.post('/signin', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.post('/handlerequest', (request, response) => {
-
-    const { email, type } = request.body
-
-    const statement = `update user_details set isActive='${type}' where email='${email}'`
-
-    db.query(statement, (error, data) => {
+router.post("/handlerequest", (request, response) => {
+  const { email, type } = request.body;
+  const statement = `update user_details set isActive='${type}' where email='${email}'`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+    } else {
+      const statement = `select first_name ,last_name,id from user_details where email='${email}';`;
+      db.query(statement, (error, data) => {
         if (error) {
-            response.send(utils.createError(error))
-        }
-        else {
-
-            const statement = `select first_name ,last_name,id from user_details where email='${email}';`
-
-            db.query(statement, (error, data) => {
+          response.send(utils.createError(error));
+        } else {
+          const name = data[0].first_name + " " + data[0].last_name;
+          const id = data[0].id;
+          const statement = `delete from request where user_details='${id}';`;
+          db.query(statement, (error, data) => {
+            if (error) {
+              response.send(utils.createError(error));
+            } else {
+              mailer.sendEmailtoReporter(email, name, (error, data) => {
                 if (error) {
-                    response.send(utils.createError(error))
+                  response.send(utils.createError(error));
+                } else {
+                  response.send(utils.createSuccess(data));
                 }
-                else {
-                    const name = data[0].first_name + " " + data[0].last_name;
-                    const id = data[0].id;
-                    const statement = `delete from request where user_details='${id}';`
-                    db.query(statement, (error, data) => {
-                        if (error) {
-                            response.send(utils.createError(error))
-                        }
-                        else {
-                            mailer.sendEmailtoReporter(email, name, (error, data) => {
-                                if (error) {
-                                    response.send(utils.createError(error))
-
-                                }
-                                else {
-                                    response.send(utils.createSuccess(data))
-
-                                }
-
-                            })
-                        }
-                    })
-
-
-
-                }
-            })
-
-
-
+              });
+            }
+          });
         }
-
-    })
-})
-
+      });
+    }
+  });
+});
 
 /**
  * @swagger
@@ -158,7 +132,7 @@ router.post('/handlerequest', (request, response) => {
  *       - application/json
  *     parameters:
  *       - name: id
- *         description: id of news 
+ *         description: id of news
  *         in: formData
  *         required: true
  *         type: int
@@ -171,23 +145,18 @@ router.post('/handlerequest', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.post('/handlenews', (request, response) => {
-
-    const { id, type } = request.body
-    console.log("id, type", id, type)
-
-    const statement = `update news_details set isActive='${type}' where id='${id}';`
-
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-        }
-        else {
-
-            response.send(utils.createSuccess(data))
-        }
-    })
-})
+router.post("/handlenews", (request, response) => {
+  const { id, type } = request.body;
+  console.log("id, type", id, type);
+  const statement = `update news_details set isActive='${type}' where id='${id}';`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+    } else {
+      response.send(utils.createSuccess(data));
+    }
+  });
+});
 
 // ---------------------------------------
 //                  GET
@@ -206,24 +175,20 @@ router.post('/handlenews', (request, response) => {
  *         description: successful message
  */
 router.get("/getprofile", (request, response) => {
-
-
-    const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
+  const statement = `SELECT first_name,last_name,phone,email,passwd,city,state,pincode
     FROM ((user_details
     INNER JOIN address ON user_details.address_id = address.id)
-    INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where type="ADM";`
-
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error));
-            console.log(`error`);
-        } else {
-            response.send(utils.createSuccess(data));
-            console.log(`data`);
-        }
-    });
+    INNER JOIN user_crdntl ON user_details.id = user_crdntl.id) where type="ADM";`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+      console.log(`error`);
+    } else {
+      response.send(utils.createSuccess(data));
+      console.log(`data`);
+    }
+  });
 });
-
 
 /**
  * @swagger
@@ -237,23 +202,16 @@ router.get("/getprofile", (request, response) => {
  *       200:
  *         description: successful message
  */
-router.get('/report', (request, response) => {
-
-    const statement = `select id,headline,report_ctr,report_reason,isActive from news_details where report_ctr>0;`
-
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-        }
-        else {
-
-            response.send(utils.createSuccess(data))
-
-        }
-
-    })
-})
-
+router.get("/report", (request, response) => {
+  const statement = `select id,headline,report_ctr,report_reason,isActive from news_details where report_ctr>0;`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+    } else {
+      response.send(utils.createSuccess(data));
+    }
+  });
+});
 
 /**
  * @swagger
@@ -267,24 +225,16 @@ router.get('/report', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.get('/reporter-request', (request, response) => {
-
-    const statement = `select u.first_name,u.last_name,u.email,u.phone  from request r join user_details u on r.user_details=u.id;`
-
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-        }
-        else {
-
-            response.send(utils.createSuccess(data))
-
-        }
-
-    })
-
-})
-
+router.get("/reporter-request", (request, response) => {
+  const statement = `select u.first_name,u.last_name,u.email,u.phone  from request r join user_details u on r.user_details=u.id;`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+    } else {
+      response.send(utils.createSuccess(data));
+    }
+  });
+});
 
 /**
  * @swagger
@@ -298,24 +248,16 @@ router.get('/reporter-request', (request, response) => {
  *       200:
  *         description: successful message
  */
-router.get('/users', (request, response) => {
-
-    const statement = `select first_name,last_name,email,phone,TYPE,isActive  from  user_details;`
-
-    db.query(statement, (error, data) => {
-        if (error) {
-            response.send(utils.createError(error))
-        }
-        else {
-
-            response.send(utils.createSuccess(data))
-
-        }
-
-    })
-
-})
-
+router.get("/users", (request, response) => {
+  const statement = `select first_name,last_name,email,phone,TYPE,isActive  from  user_details;`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+    } else {
+      response.send(utils.createSuccess(data));
+    }
+  });
+});
 
 // ---------------------------------------
 //                  PUT
@@ -326,16 +268,16 @@ router.get('/users', (request, response) => {
  *
  * /admin/blockuser:
  *   put:
- *     description: To block particular user 
+ *     description: To block particular user
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: newsId
- *         description: newsId of news 
+ *         description: newsId of news
  *         in: formData
  *         type: string
  *       - name: report_reason
- *         description: report_reason for news 
+ *         description: report_reason for news
  *         in: formData
  *         type: string
  *     responses:
@@ -343,22 +285,16 @@ router.get('/users', (request, response) => {
  *         description: successful message
  */
 router.put("/blockuser", (request, response) => {
+  const { email, isActive } = request.body;
+  console.log(" email,isActive ", email, isActive);
+  const statement = `update user_details set isActive='${isActive}' where email='${email}'`;
+  db.query(statement, (error, data) => {
+    if (error) {
+      response.send(utils.createError(error));
+    } else {
+      response.send(utils.createSuccess(data));
+    }
+  });
+});
 
-    const { email, isActive } = request.body;
-    console.log(" email,isActive ", email, isActive)
-    const statement = `update user_details set isActive='${isActive}' where email='${email}'`
-    db.query(statement, (error, data) => {
-
-        if (error) {
-            response.send(utils.createError(error));
-        } else {
-
-            response.send(utils.createSuccess(data));
-
-        }
-    })
-
-})
-
-
-module.exports = router
+module.exports = router;
